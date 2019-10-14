@@ -1,0 +1,243 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <conio.h>
+#include <windows.h>
+#include <math.h>
+
+#define SIZE_L 9
+#define SIZE_X 3
+
+void printm (int puzzle2[SIZE_X][SIZE_X]);
+void sortDesc (int arr[]);
+int swapCheck(int arr1[SIZE_X][SIZE_X],int input);
+int winCheck (int arr1[SIZE_X][SIZE_X], int arr2[SIZE_X][SIZE_X]);
+void title (){
+	FILE*fp;
+	char s;
+	fp=fopen("judul.txt","r");
+	do{
+		s=getc(fp);
+		printf("%c",s);
+	} while(s!=EOF);
+	printf ("\n\n");
+	fclose(fp);
+}
+
+int main (){
+	int puzzle [SIZE_X][SIZE_X];
+	int puzzle2 [SIZE_X][SIZE_X];
+	int* fill = (int*)(malloc(SIZE_L*sizeof(int)));
+	int i, j, k;
+	int a, b, temp;
+	int x=0, y=0, z=0;
+	int input, win=0;
+	int moves;
+	system("mode 650");
+	
+	srand(time(NULL));
+	
+	k=2;
+	for (i=0; i<SIZE_X; i++){
+		for (j=0; j<SIZE_X; j++){
+			puzzle2 [i][j]=k;
+			k++;
+		}
+	}
+	
+	Main:
+	title ();
+	printf ("\n\t\t\t\t\t\t\t\t\t1. Start\n");
+	printf ("\t\t\t\t\t\t\t\t\t2. Help\n");
+	printf ("\t\t\t\t\t\t\t\t\t3. Exit");
+	
+	input = getch()-'0';
+	system ("cls");
+	
+	switch (input){
+		case 1:
+			goto Game;
+		case 2:
+			goto Help;
+		case 3:
+			goto Exit;
+		default:
+			goto Main;
+	}
+	
+	Game:
+	x=0, y=0, z=0;
+	win=0, moves=0;
+	
+	for (i=(SIZE_L-1); i>=0; i--){
+		fill [i] = i+2;
+	}
+	
+	for (j=SIZE_L; j>=1; j--){	//Randomizer isi puzzle
+		k = rand()%j;
+		
+		puzzle[y][x]=fill[k];
+		x++;
+		x%=SIZE_X;
+		z++;
+		if (z%SIZE_X==0){
+			y++;
+		}
+		fill[k] = 0;
+	
+		sortDesc(fill);
+	}	//End randomizer
+	
+	while (win==0){	//Game Started
+		k=0;
+		title ();
+		printm (puzzle);
+		printf ("\n\n\t\t\t\t\t\t\tTekan anak panah untuk menggerakkan puzzle.\n");
+		printf ("\t\t\t\t\t\t\tTekan R untuk Restart, Esc untuk Keluar.\n\n");
+		
+		input = getch()-'0';
+		if (input==66){
+			system ("cls");
+			goto Game;
+		}
+		else if (input==-21){
+			system ("cls");
+			goto Exit;
+		}
+		system ("cls");
+		
+		swapCheck(puzzle,input);	// Fungsi mengecek puzzle
+		moves++;
+		win=winCheck(puzzle, puzzle2);
+		
+		if (win==1){
+			Win:
+			title ();
+			printm (puzzle);
+			printf ("\n\t\t\t\t\t\t\t\tYOU WIN with %d moves\n", moves);
+			printf ("\n\t\t\t\t\t\t\t\t\t1. Retry\n");
+			printf ("\t\t\t\t\t\t\t\t\t2. Exit\n");
+			
+			input = getch()-'0';
+			system ("cls");
+			
+			switch (input){
+				case 1:
+					goto Game;
+				case 2:
+					goto Exit;
+				default:
+					goto Win;
+			}
+		}
+	}	//Game Ended
+
+	free(fill);
+	goto Game;
+	
+	Help:
+	title ();
+	printf ("\t\t\t\t\t\t\t\t\tHELP\n");
+	printf ("\t\t\t\t\t  Puzzle ini digerakkan dengan memencet anak panah pada keyboard \n\t\t\t\t\t  sehingga puzzle tersusun sesuai urutan angka.\n\n");
+	system ("pause");
+	system ("cls");
+	goto Main;
+	
+	Exit:
+	title ();
+	printf ("\t\t\t\t\t\t\t\t\tGame Closed");
+	return 0;
+}
+
+void printm (int arr[SIZE_X][SIZE_X]){
+	int i, j;
+	for (i=0; i<SIZE_X; i++){
+		printf ("\t\t\t\t\t\  bt\t\t\t| ");
+		for (j=0; j<SIZE_X; j++){
+			if (arr[i][j]==SIZE_L+1){
+				printf ("  ");
+			}
+			else {
+				printf ("%d ", arr[i][j]-1);
+			}
+		}
+		printf ("|\n");
+	}
+}
+
+void sortDesc (int arr[SIZE_L]){
+	int a, b, temp;
+	for (a=1; a<SIZE_L; a++){
+		for (b=0; b<SIZE_L-1; b++){
+			if (arr[b]<arr[b+1]){
+				temp=arr[b];
+				arr[b]=arr[b+1];
+				arr[b+1]=temp;
+			}
+		}
+	}
+}
+
+int swapCheck(int arr1[SIZE_X][SIZE_X],int input){
+	int i,j,temp,k;
+	for (i=0; i<SIZE_X; i++){	//Input swapCheck on puzzle board
+		for (j=0; j<SIZE_X; j++){
+			if (arr1[i][j]==SIZE_L+1){	//Puzzle's element swapper on x or y axis
+				if (input==32 && i!=0){
+					temp=arr1[i][j];
+					arr1[i][j]=arr1[i-1][j];
+					arr1[i-1][j]=temp;
+					k=1;
+					break;
+				}
+				
+				if (input==24 && i!=SIZE_X-1){
+					temp=arr1[i][j];
+					arr1[i][j]=arr1[i+1][j];
+					arr1[i+1][j]=temp;
+					k=1;
+					break;
+				}
+				
+				if (input==29 && j!=0){
+					temp=arr1[i][j];
+					arr1[i][j]=arr1[i][j-1];
+					arr1[i][j-1]=temp;
+					k=1;
+					break;
+				}
+			
+				if (input==27 && j!=SIZE_X-1){
+					temp=arr1[i][j];
+					arr1[i][j]=arr1[i][j+1];
+					arr1[i][j+1]=temp;
+					k=1;
+					break;
+				}
+			}	
+		}
+		if (k==1){
+			break;
+		}
+	}	//End check
+		return k,input;	
+}
+
+int winCheck (int arr1[SIZE_X][SIZE_X], int arr2[SIZE_X][SIZE_X]){
+	int i, j, k=0;
+	int win;
+	for (i=0; i<SIZE_X; i++){
+		for (j=0; j<SIZE_X; j++){
+			if (arr1[i][j]==arr2[i][j]){
+				k++;
+			}
+		}
+	}
+	if (k==SIZE_L){
+		win=1;
+	}
+	else{
+		win=0;
+	}
+	return win;
+}
